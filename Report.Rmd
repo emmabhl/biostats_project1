@@ -1,5 +1,5 @@
 ---
-title: "Report"
+# title: "Report"
 output: pdf_document
 date: "`r Sys.Date()`"
 ---
@@ -27,3 +27,28 @@ plot(pressure)
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r import, include=FALSE}
+ load("projectData.RData")
+```
+
+## Introduction
+
+Pour toi Sander
+
+## EDA
+
+```{r summary}
+ summary(data)
+```
+```{r summary}
+ str(data)
+```
+
+
+
+
+
+
+
+
