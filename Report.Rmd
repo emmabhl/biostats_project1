@@ -4,50 +4,101 @@ output: pdf_document
 date: "`r Sys.Date()`"
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
-
 ```{r import, include=FALSE}
  load("projectData.RData")
 ```
 
-## Introduction
+# Introduction
 
 Pour toi Sander
 
-## EDA
+# EDA
 
-```{r summary}
- summary(data)
-```
-```{r summary}
+```{r str, echo=FALSE}
  str(data)
 ```
 
+We can observe that Crminals per 100k are considered as character although they are discrete data. Thus we can convert them to integer.
+
+```{r convert, echo=FALSE}
+data$criminals_per_100k <- as.integer(data$criminals_per_100k)
+str(data)
+attach(data)
+```
+
+## Univariate analysis
+
+```{r summary, echo=FALSE}
+ summary(data)
+```
+### Numerical features
+
+In order to perform the univariate analysis for numerical features (here the number of ale beer houses per 100k per county, the number of public school attendants per 100k per county and the number of public whorship per 100k per county, we computed informations about the center of each distribution (the mean and the median), and about the spread (with the minimum and maximum value as well as the lower percentile 25 and the upper percentile 75).
+
+Ajouter Standard deviation (SD), Interquartile range (IQR), Median Absolute Deviation (MAD)
+
+While the mean is very sensitive to outliers, the median is not. Thus by comparing the two, we can have insights on the presence of outliers. We can observe that the mean and the median are quite similar relative to the spread for all four numerical features, infering against the presence of outliers.
+We can assert this by computing the boxplots of the numerical features (See figure below) and observe the absence of outliers except maybe for one suspected outlier in the distribution of school attendants per county. 
+
+In order to have a visual summary of the distributions, boxplots and histograms are displayed below.
+
+```{r boxplots1, echo=FALSE}
+data$criminals_per_100k <- as.integer(data$criminals_per_100k)
+par(mfrow=c(1,2))
+boxplot(criminals_per_100k, main = "Nb Criminals per county")
+boxplot(ale_beer_houses_per_100k, main = "Nb Beer Houses per county")
+```
+```{r boxplots2, echo=FALSE}
+data$criminals_per_100k <- as.integer(data$criminals_per_100k)
+par(mfrow=c(1,2))
+boxplot(attendants_public_school_per_100k, main = "Nb School attendants per county")
+boxplot(attendants_public_worship_per_100k, main = "Nb Worship attendants per county")
+```
+
+```{r histograms1, echo=FALSE}
+par(mfrow=c(1,2))
+hist(criminals_per_100k, breaks=12, main = "Nb Criminals per county")
+hist(ale_beer_houses_per_100k, breaks=12, main = "Beer Houses per county")
+```
+```{r histograms2, echo=FALSE}
+par(mfrow=c(1,2))
+hist(attendants_public_school_per_100k, breaks=12, main = "School attendants per county")
+hist(attendants_public_worship_per_100k, breaks=12, main = "Worship attendants per county")
+```
 
 
+We can observe on both the boxplots and the histograms that the distributions are quite symmetric, while being slightly left-skewed for the Beer Houses and slightly right-skewed for the Public School attendants. 
 
+Since values are discrete and above 0 for all three numerical features, we can think that they belong to the Poisson distribution
+
+#### Comparison with Poisson distribution
+
+
+```{r qqplots1, echo=FALSE}
+par(mfrow=c(1,2), plt=c(0.2, 0.8, 0.2, 0.8))
+qqplot(criminals_per_100k, rpois(n = length(criminals_per_100k), lambda = mean(criminals_per_100k)), , ylab = "theoretical poisson")
+qqplot(ale_beer_houses_per_100k, rpois(n = length(ale_beer_houses_per_100k), lambda = mean(ale_beer_houses_per_100k)), , ylab = "theoretical poisson")
+```
+```{r qqplots2, echo=FALSE}
+par(mfrow=c(1,2), plt=c(0.2, 0.8, 0.2, 0.8))
+qqplot(attendants_public_school_per_100k, rpois(n = length(attendants_public_school_per_100k), lambda = mean(attendants_public_school_per_100k)), , ylab = "theoretical poisson")
+qqplot(attendants_public_worship_per_100k, rpois(n = length(attendants_public_worship_per_100k), lambda = mean(attendants_public_worship_per_100k)), ylab = "theoretical poisson")
+```
+Scales do not correspond, so they are not Poisson distribued ?
+Can they be Normal ?
+```{r scale, include=FALSE}
+data$scaled_criminals_per_100k = (criminals_per_100k - mean(criminals_per_100k))/sd(criminals_per_100k)
+data$scaled_ale_beer_houses_per_100k = (ale_beer_houses_per_100k - mean(ale_beer_houses_per_100k))/sd(ale_beer_houses_per_100k)
+data$scaled_attendants_public_school_per_100k = (attendants_public_school_per_100k - mean(attendants_public_school_per_100k))/sd(attendants_public_school_per_100k)
+data$scaled_attendants_public_worship_per_100k = (attendants_public_worship_per_100k - mean(attendants_public_worship_per_100k))/sd(attendants_public_worship_per_100k)
+
+str(data)
+attach(data)
+```
+
+```{r qqplots normal, echo=FALSE}
+qqnorm(scaled_ale_beer_houses_per_100k)
+```
 
 
 
