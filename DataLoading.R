@@ -11,8 +11,14 @@ data[(36:40), 4:nc] <- data[(36:40), 3:nc]
 ## For entries where the region name is one word, put them together in column 2
 data[(1:13), 2] <- paste(data[(1:13), 2], data[(1:13), 3])
 data[(17:35), 2] <- paste(data[(17:35), 2], data[(17:35), 3])
+
+
 ## Get rid of 3rd column
 data <- subset(data, select = -3)
+
+### Column V5 was of type char, we change it for int
+data$V5 <- as.integer(data$V5)
+
 ## Add corresponding column names 
 colnames(data) <- c("county", "region_name", "region_code", "criminals_per_100k", "ale_beer_houses_per_100k", "attendants_public_school_per_10k", "attendants_public_worship_per_2k")
 ## Saving newly modified object for later use
