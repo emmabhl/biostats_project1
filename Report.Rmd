@@ -18,10 +18,14 @@ Pour toi Sander
  str(data)
 ```
 
-We can observe that Crminals per 100k are considered as character although they are discrete data. Thus we can convert them to integer.
+We can observe that Criminals per 100k are considered as character although they are discrete data. Thus we can convert them to integer.
 
-```{r convert, echo=FALSE}
+Furthermore, region_name and region_code are identified as characters although they are factors. Thus we can convert them to factors.
+
+```{r convert, include=FALSE}
 data$criminals_per_100k <- as.integer(data$criminals_per_100k)
+data$region_code <- as.factor(data$region_code)
+data$region_name <- as.factor(data$region_name)
 str(data)
 attach(data)
 ```
@@ -44,26 +48,19 @@ In order to have a visual summary of the distributions, boxplots and histograms 
 
 ```{r boxplots1, echo=FALSE}
 data$criminals_per_100k <- as.integer(data$criminals_per_100k)
-par(mfrow=c(1,2))
-boxplot(criminals_per_100k, main = "Nb Criminals per county")
-boxplot(ale_beer_houses_per_100k, main = "Nb Beer Houses per county")
-```
-```{r boxplots2, echo=FALSE}
-data$criminals_per_100k <- as.integer(data$criminals_per_100k)
-par(mfrow=c(1,2))
-boxplot(attendants_public_school_per_100k, main = "Nb School attendants per county")
-boxplot(attendants_public_worship_per_100k, main = "Nb Worship attendants per county")
+par(mfrow=c(1,4))
+boxplot(criminals_per_100k, main = "Criminals per county")
+boxplot(ale_beer_houses_per_100k, main = "Beer Houses per county")
+boxplot(attendants_public_school_per_100k, main = paste("School attendants" , "\n", "per county"))
+boxplot(attendants_public_worship_per_100k, main = paste("Worship attendants", "\n", "per county"))
 ```
 
 ```{r histograms1, echo=FALSE}
-par(mfrow=c(1,2))
-hist(criminals_per_100k, breaks=12, main = "Nb Criminals per county")
-hist(ale_beer_houses_per_100k, breaks=12, main = "Beer Houses per county")
-```
-```{r histograms2, echo=FALSE}
-par(mfrow=c(1,2))
-hist(attendants_public_school_per_100k, breaks=12, main = "School attendants per county")
-hist(attendants_public_worship_per_100k, breaks=12, main = "Worship attendants per county")
+par(mfrow=c(1,4))
+hist(criminals_per_100k, breaks=12, main = paste("Nb Criminals", "\n", "per county"))
+hist(ale_beer_houses_per_100k, breaks=12, main = paste("Nb Beer Houses" , "\n", "per county"))
+hist(attendants_public_school_per_100k, breaks=12, main = paste("Nb School attendants" , "\n", "per county"))
+hist(attendants_public_worship_per_100k, breaks=12, main = paste("Nb Worship attendants", "\n", "per county"))
 ```
 
 
@@ -75,17 +72,24 @@ Since values are discrete and above 0 for all three numerical features, we can t
 
 
 ```{r qqplots1, echo=FALSE}
-par(mfrow=c(1,2), plt=c(0.2, 0.8, 0.2, 0.8))
-qqplot(criminals_per_100k, rpois(n = length(criminals_per_100k), lambda = mean(criminals_per_100k)), , ylab = "theoretical poisson")
-qqplot(ale_beer_houses_per_100k, rpois(n = length(ale_beer_houses_per_100k), lambda = mean(ale_beer_houses_per_100k)), , ylab = "theoretical poisson")
+par(mfrow=c(1,4)) #plt=c(0.2, 0.8, 0.2, 0.8))
+qqplot(rpois(n = length(criminals_per_100k), lambda = mean(criminals_per_100k)), criminals_per_100k, xlab = "theoretical poisson")
+qqplot(rpois(n = length(ale_beer_houses_per_100k), lambda = mean(ale_beer_houses_per_100k)), ale_beer_houses_per_100k, xlab = "theoretical poisson")
+qqplot(rpois(n = length(attendants_public_school_per_100k), lambda = mean(attendants_public_school_per_100k)), attendants_public_school_per_100k, xlab = "theoretical poisson")
+qqplot(rpois(n = length(attendants_public_worship_per_100k), lambda = mean(attendants_public_worship_per_100k)), attendants_public_worship_per_100k, xlab = "theoretical poisson")
 ```
-```{r qqplots2, echo=FALSE}
-par(mfrow=c(1,2), plt=c(0.2, 0.8, 0.2, 0.8))
-qqplot(attendants_public_school_per_100k, rpois(n = length(attendants_public_school_per_100k), lambda = mean(attendants_public_school_per_100k)), , ylab = "theoretical poisson")
-qqplot(attendants_public_worship_per_100k, rpois(n = length(attendants_public_worship_per_100k), lambda = mean(attendants_public_worship_per_100k)), ylab = "theoretical poisson")
+Scales do not correspond exept maybe  criminals, so they are not Poisson distribued ?
+
+```{r qqplots criminals, echo=FALSE}
+par(pty="s")
+xlim = c(min(criminals_per_100k), max(criminals_per_100k))
+qqplot(rpois(n = length(criminals_per_100k), lambda = mean(criminals_per_100k)), criminals_per_100k, xlab = "theoretical poisson",xlim = xlim, ylim = xlim)
+par(pty="m")
 ```
-Scales do not correspond, so they are not Poisson distribued ?
+Mouais
+
 Can they be Normal ?
+
 ```{r scale, include=FALSE}
 data$scaled_criminals_per_100k = (criminals_per_100k - mean(criminals_per_100k))/sd(criminals_per_100k)
 data$scaled_ale_beer_houses_per_100k = (ale_beer_houses_per_100k - mean(ale_beer_houses_per_100k))/sd(ale_beer_houses_per_100k)
@@ -96,10 +100,20 @@ str(data)
 attach(data)
 ```
 
-```{r qqplots normal, echo=FALSE}
-qqnorm(scaled_ale_beer_houses_per_100k)
+```{r qqplots normal1, echo=FALSE}
+par(mfrow=c(1,2))
+qqnorm(scaled_criminals_per_100k, main = "Normal QQ plot for criminals")
+qqline(scaled_criminals_per_100k)
+qqnorm(scaled_ale_beer_houses_per_100k, main = "Normal QQ plot for beer houses")
+qqline(scaled_ale_beer_houses_per_100k)
 ```
-
+```{r qqplots normal2, echo=FALSE}
+par(mfrow=c(1,2))
+qqnorm(scaled_attendants_public_school_per_100k, main="Normal QQ plot - school attendants")
+qqline(scaled_attendants_public_school_per_100k)
+qqnorm(scaled_attendants_public_worship_per_100k, main = "Normal QQ plot -  worship attendants")
+qqline(scaled_attendants_public_school_per_100k)
+```
 
 
 
