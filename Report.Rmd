@@ -1,7 +1,8 @@
 ---
-# title: "Report"
-output: pdf_document
+title: "Report2"
+author: "Sander Miesen, Gaelle Verdon, Emma Boehly, Constance de Trogoff"
 date: "`r Sys.Date()`"
+output: pdf_document
 ---
 
 ```{r import, include=FALSE}
@@ -10,7 +11,10 @@ date: "`r Sys.Date()`"
 
 # Introduction
 
-Pour toi Sander
+Investigating the causes of crime is a complicated task. Indeed, many external factors, such as civil wars and worker strikes could influence any region’s crime rates drastically, and these factors are hard to control for. Our dataset, collected by John Clay between 1849 and 1853, has the particularity of having very few of those disturbances as there were, in his own words, “no political or social excitement [and] no cessation of the employment”. Additionally, in 1851 there was a Census, thus making the recording of the number of inhabitants as accurate as possible. These two factors make this an ideal case study, controlling for many external variables.
+
+In this report, we aim to investigate how counties’ number of criminals per 100’000 inhabitants are affected by the number of ale and beer houses per 100’000 inhabitants, as well as the number of people attending at school per 10’000 inhabitants and the number of people attending at public worship per 2’000 inhabitants. These variables are interesting as they relate to three more general socio-cultural themes which often come up when talking about crime, namely drunkenness, education and religion. Through the running of regression models, we hope to find significant relationships between the variables and the crime rate, which could eventually help set up measures to decrease it.
+
 
 # EDA
 
@@ -18,9 +22,8 @@ Pour toi Sander
  str(data)
 ```
 
-We can observe that Criminals per 100k are considered as character although they are discrete data. Thus we can convert them to integer.
-
-Furthermore, region_name and region_code are identified as characters although they are factors. Thus we can convert them to factors.
+(We could observe that Criminals per 100k are considered as character although they are discrete data. Thus we converted them to integer.
+Furthermore, region_name and region_code were identified as characters although they are factors. Thus we converted them to factors.)
 
 ```{r convert, include=FALSE}
 data$criminals_per_100k <- as.integer(data$criminals_per_100k)
@@ -30,8 +33,9 @@ str(data)
 attach(data)
 ```
 
-## Univariate analysis
+To start our data exploration, we first performed a univariate data analysis of the predictors and of the response variable of interest meaning the number of criminals per 100k per county. We have 3 numerical features : the number of Ale beer houses per 100k per county, the of public school attendants per 100k per county, and the number of public worship attendants per 100k per county, and 3 categorical features : the county names, the region names and the region codes. By observing the data, we could notice that each sample corresponds to a different county name and thus we ignored this last feature for the following of our analysis.
 
+Faire un tableau latex avec les données suivantes en rajoutant Standard deviation (SD), Interquartile range (IQR), Median Absolute Deviation (MAD)
 ```{r summary, echo=FALSE}
 # Assuming 'data' is your dataset
 
@@ -45,42 +49,9 @@ categorical_data <- data[, categorical_features]
 
 summary(numerical_data)
 ```
-### Numerical features
 
-In order to perform the univariate analysis for numerical predictors (here the number of ale beer houses per 100k per county, the number of public school attendants per 100k per county and the number of public whorship per 100k per county), we computed informations about the center of each distribution (the mean and the median), and about the spread (with the minimum and maximum value as well as the lower percentile 25 and the upper percentile 75).
-
-Ajouter Standard deviation (SD), Interquartile range (IQR), Median Absolute Deviation (MAD)
-
-While the mean is very sensitive to outliers, the median is not. Thus by comparing the two, we can have insights on the presence of outliers. We can observe that the mean and the median are quite similar relative to the spread for all three numerical features, infering against the presence of outliers.
-We can assert this by computing the boxplots of the numerical features (See figure below) and observe the absence of outliers except maybe for one suspected outlier in the distribution of school attendants per county. 
-
-In order to have a visual summary of the distributions, boxplots and histograms are displayed below.
-
-```{r boxplots1, include=FALSE}
-data$criminals_per_100k <- as.integer(data$criminals_per_100k)
-
-# Creating a single boxplot with different colors for each feature
-boxplot(ale_beer_houses_per_100k, 
-        attendants_public_school_per_100k, 
-        attendants_public_worship_per_100k, 
-        main = "Comparison of Various Features per County",
-        names = c("Beer Houses", "School Attendants", "Worship Attendants"),
-        ylab = "Count per 100k")
-
-```
-
-```{r histograms1, include=FALSE}
-par(mfrow=c(1,3))
-hist(ale_beer_houses_per_100k, breaks=12, main = paste("Nb Beer Houses" , "\n", "per county"))
-hist(attendants_public_school_per_100k, breaks=12, main = paste("Nb School attendants" , "\n", "per county"))
-hist(attendants_public_worship_per_100k, breaks=12, main = paste("Nb Worship attendants", "\n", "per county"))
-hist(criminals_per_100k, breaks=12, main = paste("Nb Criminals", "\n", "per county"))
-```
-```{r histograms2, include=FALSE}
-library(packHV)
-hist_boxplot(criminals_per_100k,freq=FALSE,density=TRUE, breaks=20)
-```
 ```{r boxplots2, echo=FALSE}
+library(packHV)
 layout(matrix(c(1, 1, 2), nrow = 1), widths = c(1.25, 1))
 
 # Creating a single boxplot with different colors for each feature
@@ -90,60 +61,9 @@ boxplot(ale_beer_houses_per_100k,
         main = "Comparison of Various Features per County",
         names = c("Beer Houses", "School Attendants", "Worship Attendants"),
         ylab = "Count per 100k")
-hist_boxplot(criminals_per_100k,freq=FALSE,density=TRUE, breaks=20)
+hist_boxplot(criminals_per_100k, breaks=20, ymax=6)
 ```
 
-We can observe on both the boxplots and the histograms that the distributions are quite symmetric, while being slightly left-skewed for the Beer Houses, and the Worship attendants and slightly right-skewed for the Public School attendants. 
-
-Since values are discrete and above 0 for all three numerical features, we can think that they belong to the Poisson distribution
-
-#### Comparison with Poisson distribution
-
-
-```{r qqplots1, include=FALSE}
-par(mfrow=c(1,4)) #plt=c(0.2, 0.8, 0.2, 0.8))
-qqplot(rpois(n = length(criminals_per_100k), lambda = mean(criminals_per_100k)), criminals_per_100k, xlab = "theoretical poisson")
-qqplot(rpois(n = length(ale_beer_houses_per_100k), lambda = mean(ale_beer_houses_per_100k)), ale_beer_houses_per_100k, xlab = "theoretical poisson")
-qqplot(rpois(n = length(attendants_public_school_per_100k), lambda = mean(attendants_public_school_per_100k)), attendants_public_school_per_100k, xlab = "theoretical poisson")
-qqplot(rpois(n = length(attendants_public_worship_per_100k), lambda = mean(attendants_public_worship_per_100k)), attendants_public_worship_per_100k, xlab = "theoretical poisson")
-```
-Scales do not correspond exept maybe  criminals, so they are not Poisson distribued ?
-
-```{r qqplots criminals, include=FALSE}
-par(pty="s")
-xlim = c(min(criminals_per_100k), max(criminals_per_100k))
-qqplot(rpois(n = length(criminals_per_100k), lambda = mean(criminals_per_100k)), criminals_per_100k, xlab = "theoretical poisson",xlim = xlim, ylim = xlim)
-par(pty="m")
-```
-Mouais
-
-Can they be Normal ?
-
-```{r scale, include=FALSE}
-data$scaled_criminals_per_100k = (criminals_per_100k - mean(criminals_per_100k))/sd(criminals_per_100k)
-data$scaled_ale_beer_houses_per_100k = (ale_beer_houses_per_100k - mean(ale_beer_houses_per_100k))/sd(ale_beer_houses_per_100k)
-data$scaled_attendants_public_school_per_100k = (attendants_public_school_per_100k - mean(attendants_public_school_per_100k))/sd(attendants_public_school_per_100k)
-data$scaled_attendants_public_worship_per_100k = (attendants_public_worship_per_100k - mean(attendants_public_worship_per_100k))/sd(attendants_public_worship_per_100k)
-
-str(data)
-attach(data)
-```
-
-```{r qqplots normal1, include=FALSE}
-par(mfrow=c(1,2))
-qqnorm(scaled_criminals_per_100k, main = "Normal QQ plot for criminals")
-qqline(scaled_criminals_per_100k)
-qqnorm(scaled_ale_beer_houses_per_100k, main = "Normal QQ plot for beer houses")
-qqline(scaled_ale_beer_houses_per_100k)
-```
-```{r qqplots normal2, include=FALSE}
-par(mfrow=c(1,2))
-qqnorm(scaled_attendants_public_school_per_100k, main="Normal QQ plot - school attendants")
-qqline(scaled_attendants_public_school_per_100k)
-qqnorm(scaled_attendants_public_worship_per_100k, main = "Normal QQ plot -  worship attendants")
-qqline(scaled_attendants_public_school_per_100k)
-```
-### Categorical features
 
 ```{r heatmap, echo=FALSE}
 #library(gplots)
@@ -166,6 +86,7 @@ heatmap(cont_matrix,
 legend("bottomleft", legend = c("0", "Above 0"), fill = c("lightyellow", "blue"), bty = "n")
 
 ```
+
 Each region name corresponds to a region code.
 We have to replace the region_code "1" of South Eastern to factor "9"
 
@@ -177,7 +98,6 @@ categorical_features <- sapply(data, function(x) is.factor(x) | is.character(x))
 categorical_data <- data[, categorical_features]
 summary(categorical_data)
 ```
-## Bivariate analysis
 
 ```{r bivariate boxplot, echo=FALSE}
 factor_colors <- c("red", "blue", "green", "orange", "purple", "yellow", "pink", "cyan") # , "magenta")
@@ -194,36 +114,6 @@ boxplot(criminals_per_100k ~ factor(region_code, levels = ordered_region),
 
 ```
 
-```{r correlation, include=FALSE, warning=FALSE}
-# Scatter plot of pairwise correlation between the three predictor variables:
-
-# Selecting the predictor variables
-predictor_vars <- data.frame(
-  ale_beer_houses_per_100k,
-  attendants_public_school_per_100k,
-  attendants_public_worship_per_100k
-)
-
-# Creating the scatterplot matrix
-pairs(predictor_vars, 
-      main = "Pairwise Scatterplot of Predictor Variables")
-
-```
-
-```{r correlation2, include=FALSE, warning=FALSE}
-# Customize upper panel
-upper.panel<-function(x, y){
-  points(x,y)
-  r <- round(cor(x, y), digits=2)
-  txt <- paste0("R = ", r)
-  usr <- par("usr"); on.exit(par(usr))
-  par(usr = c(0, 1, 0, 1))
-  text(0.5, 0.9, txt)
-}
-pairs(predictor_vars, lower.panel = NULL, 
-      upper.panel = upper.panel)
-
-```
 ```{r correlation3, echo=FALSE, warning=FALSE}
 # Customize upper panel
 upper.panel<-function(x, y){
@@ -238,3 +128,4 @@ pairs(data[,5:7], lower.panel = NULL,
       upper.panel = upper.panel)
 
 ```
+
