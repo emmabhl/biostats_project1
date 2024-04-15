@@ -118,9 +118,10 @@ factor_colors <- c("cyan", "red")
 subset_data <- data[data$region_code %in% c(factor("4"), factor("8")), ]
 subset_data$region_code <- factor(subset_data$region_code, levels = c(factor("4"), factor("8")))
 
-boxplot(subset_data$ale_beer_houses_per_100k ~ subset_data$region_code, 
-        main = "",
-        col = factor_colors,)
+par(mfrow=c(1,3))
+boxplot(subset_data$ale_beer_houses_per_100k ~ subset_data$region_code, main = "", col = factor_colors)
+boxplot(subset_data$attendants_public_school_per_100k ~ subset_data$region_code, main = "", col = factor_colors)
+boxplot(subset_data$attendants_public_worship_per_100k ~ subset_data$region_code, main = "", col = factor_colors)
 ```
 
 
