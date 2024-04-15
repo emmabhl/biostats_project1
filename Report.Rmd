@@ -33,40 +33,9 @@ str(data)
 attach(data)
 ```
 
-To start our data exploration, we first performed a univariate data analysis of the predictors and of the response variable of interest meaning the number of criminals per 100k per county. We have 3 numerical features : the number of Ale beer houses per 100k per county, the of public school attendants per 100k per county, and the number of public worship attendants per 100k per county, and 3 categorical features : the county names, the region names and the region codes. By observing the data, we could notice that each sample corresponds to a different county name and thus we ignored this last feature for the following of our analysis.
+To start our data exploration, we first performed a univariate data analysis of the predictors and of the response variable of interest meaning the number of criminals per 100k per county. We have 3 numerical features : the number of Ale beer houses per 100k per county, the of public school attendants per 100k per county, and the number of public worship attendants per 100k per county, and 3 categorical features : the county names, the region names and the region codes. By observing the data, we could notice that each sample corresponds to a different county name and thus we ignored this last feature for the following of our analysis. We could also remark that each region name corresponds to a region code, except for "South Midland" which had the same region code as "South Eastern". We thus replaced the region_code "1" of South Eastern to factor "0". Proportions of categorical features are indicated in Table 1. (Faire un tableau latex)
 
-Faire un tableau latex avec les données suivantes en rajoutant Standard deviation (SD), Interquartile range (IQR), Median Absolute Deviation (MAD)
-```{r summary, echo=FALSE}
-# Assuming 'data' is your dataset
-
-# Extract numerical and categorical features
-numerical_features <- sapply(data, is.numeric)
-categorical_features <- sapply(data, function(x) is.factor(x) | is.character(x))
-
-# Subset data based on feature types
-numerical_data <- data[, numerical_features]
-categorical_data <- data[, categorical_features]
-
-summary(numerical_data)
-```
-
-```{r boxplots2, echo=FALSE}
-library(packHV)
-layout(matrix(c(1, 1, 2), nrow = 1), widths = c(1.25, 1))
-
-# Creating a single boxplot with different colors for each feature
-boxplot(ale_beer_houses_per_100k, 
-        attendants_public_school_per_100k, 
-        attendants_public_worship_per_100k, 
-        main = "Comparison of Various Features per County",
-        names = c("Beer Houses", "School Attendants", "Worship Attendants"),
-        ylab = "Count per 100k")
-hist_boxplot(criminals_per_100k, breaks=20, ymax=6)
-```
-
-
-```{r heatmap, echo=FALSE}
-#library(gplots)
+```{r heatmap, include=FALSE}
 
 cont_table = table(data$region_name, data$region_code)
 # Convert the table to a matrix
@@ -87,20 +56,49 @@ legend("bottomleft", legend = c("0", "Above 0"), fill = c("lightyellow", "blue")
 
 ```
 
-Each region name corresponds to a region code.
-We have to replace the region_code "1" of South Eastern to factor "9"
-
 ```{r summary2, echo=FALSE}
-data$region_code <- factor(data$region_code, levels = c(levels(data$region_code), "9"))
-data[data$region_name == "South Eastern", "region_code"] <- factor("9")
+data$region_code <- factor(data$region_code, levels = c(levels(data$region_code), "0"))
+data[data$region_name == "South Eastern", "region_code"] <- factor("0")
+attach(data)
 
 categorical_features <- sapply(data, function(x) is.factor(x) | is.character(x))
 categorical_data <- data[, categorical_features]
+
 summary(categorical_data)
 ```
 
+We first computed informations about the center of each numerical predictors distribution (the mean and the median), and about the spread (with the minimum and maximum value, the lower percentile 25 and the upper percentile 75 as well as the standard deviations). Results are displayed in Table 2.
+
+Faire un tableau latex avec les données suivantes en rajoutant Standard deviation (SD), Interquartile range (IQR), Median Absolute Deviation (MAD)
+```{r summary, echo=FALSE}
+# Assuming 'data' is your dataset
+
+# Extract numerical features and corresponding data
+numerical_features <- sapply(data, is.numeric)
+numerical_data <- data[, numerical_features]
+
+summary(numerical_data)
+```
+
+While the mean is very sensitive to outliers, the median is not. Thus by comparing the two, we can have insights on the presence of outliers. We can observe that the mean and the median are quite similar relative to the spread for all three numerical features, infering against the presence of outliers. In order to have a visual summary of the distributions, boxplot of the predictors are shown in Figure 1. They appear to be quite symmetric, while being slightly left-skewed for the Beer Houses, and the Worship attendants and slightly right-skewed for the Public School attendants. 
+
+```{r boxplots2, echo=FALSE}
+library(packHV)
+layout(matrix(c(1, 1, 2), nrow = 1), widths = c(1.25, 1))
+
+# Creating a single boxplot with different colors for each feature
+boxplot(ale_beer_houses_per_100k, 
+        attendants_public_school_per_100k, 
+        attendants_public_worship_per_100k, 
+        main = "Comparison of Various Features per County",
+        names = c("Beer Houses", "School Attendants", "Worship Attendants"),
+        ylab = "Count per 100k")
+hist_boxplot(criminals_per_100k, breaks=20, ymax=6)
+```
+
+
 ```{r bivariate boxplot, echo=FALSE}
-factor_colors <- c("red", "blue", "green", "orange", "purple", "yellow", "pink", "cyan") # , "magenta")
+factor_colors <- c("red", "blue", "green", "orange", "purple", "yellow", "pink", "cyan", "magenta")
 
 # Order region codes by median value
 ordered_region <- names(sort(tapply(criminals_per_100k, region_code, median)))
@@ -113,6 +111,8 @@ boxplot(criminals_per_100k ~ factor(region_code, levels = ordered_region),
         ylab = "Criminals per 100k")
 
 ```
+
+Next, to better visualize the response variable of interest, i.e. the number of criminals per county per 100k, we plotted its distribution with a histogran and a boxplot in Figure 2 which is slightly left skewed. For a first naive comparison of its distribution across regions, we displayed seperate boxplots for each region in Figure 3. We could observe clear differences between the number of criminals' median and us ordered them in ascending order. As we can hypothesize a statistical difference between region 8 (corresponding to "Northern") which as a median number of criminals lower than 100, and region 4 (corresponding to West Midland) which has a median number of criminal higher than 200, we compared the predictor's distribution of those 2 regions in Figure 4.
 
 ```{r correlation3, echo=FALSE, warning=FALSE}
 # Customize upper panel
