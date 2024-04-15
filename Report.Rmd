@@ -96,9 +96,11 @@ boxplot(ale_beer_houses_per_100k,
 hist_boxplot(criminals_per_100k, breaks=20, ymax=6)
 ```
 
+Next, to better visualize the response variable of interest, i.e. the number of criminals per county per 100k, we plotted its distribution with a histogran and a boxplot in Figure 2 which is slightly left skewed. For a first naive comparison of its distribution across regions, we displayed seperate boxplots for each region in Figure 3. We could observe clear differences between the number of criminals' median and us ordered them in ascending order. As we can hypothesize a statistical difference between region 8 (corresponding to "Northern") which as a median number of criminals lower than 100, and region 4 (corresponding to West Midland) which has a median number of criminal higher than 200, we compared the predictor's distribution of those 2 regions in Figure 4.
+
 
 ```{r bivariate boxplot, echo=FALSE}
-factor_colors <- c("red", "blue", "green", "orange", "purple", "yellow", "pink", "cyan", "magenta")
+factor_colors <- c("red", "blue", "green", "orange", "purple", "yellow", "pink", "magenta", "cyan")
 
 # Order region codes by median value
 ordered_region <- names(sort(tapply(criminals_per_100k, region_code, median)))
@@ -111,10 +113,19 @@ boxplot(criminals_per_100k ~ factor(region_code, levels = ordered_region),
         ylab = "Criminals per 100k")
 
 ```
+```{r dist,echo=False}
+factor_colors <- c("cyan", "red")
+subset_data <- data[data$region_code %in% c(factor("4"), factor("8")), ]
+subset_data$region_code <- factor(subset_data$region_code, levels = c(factor("4"), factor("8")))
 
-Next, to better visualize the response variable of interest, i.e. the number of criminals per county per 100k, we plotted its distribution with a histogran and a boxplot in Figure 2 which is slightly left skewed. For a first naive comparison of its distribution across regions, we displayed seperate boxplots for each region in Figure 3. We could observe clear differences between the number of criminals' median and us ordered them in ascending order. As we can hypothesize a statistical difference between region 8 (corresponding to "Northern") which as a median number of criminals lower than 100, and region 4 (corresponding to West Midland) which has a median number of criminal higher than 200, we compared the predictor's distribution of those 2 regions in Figure 4.
+boxplot(subset_data$ale_beer_houses_per_100k ~ subset_data$region_code, 
+        main = "",
+        col = factor_colors,)
+```
+
 
 ```{r correlation3, echo=FALSE, warning=FALSE}
+factor_colors <- c("red", "blue", "green", "orange", "purple", "yellow", "pink", "magenta", "cyan")
 # Customize upper panel
 upper.panel<-function(x, y){
   points(x,y, pch=19, col=factor_colors[data$region_code])
