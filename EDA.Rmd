@@ -56,8 +56,8 @@ data$criminals_per_100k <- as.integer(data$criminals_per_100k)
 
 # Creating a single boxplot with different colors for each feature
 boxplot(ale_beer_houses_per_100k, 
-        attendants_public_school_per_100k, 
-        attendants_public_worship_per_100k, 
+        attendants_public_school_per_10k, 
+        attendants_public_worship_per_2k, 
         main = "Comparison of Various Features per County",
         names = c("Beer Houses", "School Attendants", "Worship Attendants"),
         ylab = "Count per 100k")
@@ -80,8 +80,8 @@ layout(matrix(c(1, 1, 2), nrow = 1), widths = c(1.25, 1))
 
 # Creating a single boxplot with different colors for each feature
 boxplot(ale_beer_houses_per_100k, 
-        attendants_public_school_per_100k, 
-        attendants_public_worship_per_100k, 
+        attendants_public_school_per_10k, 
+        attendants_public_worship_per_2k, 
         main = "Comparison of Various Features per County",
         names = c("Beer Houses", "School Attendants", "Worship Attendants"),
         ylab = "Count per 100k")
@@ -100,8 +100,8 @@ Since values are discrete and above 0 for all three numerical features, we can t
 par(mfrow=c(1,4)) #plt=c(0.2, 0.8, 0.2, 0.8))
 qqplot(rpois(n = length(criminals_per_100k), lambda = mean(criminals_per_100k)), criminals_per_100k, xlab = "theoretical poisson")
 qqplot(rpois(n = length(ale_beer_houses_per_100k), lambda = mean(ale_beer_houses_per_100k)), ale_beer_houses_per_100k, xlab = "theoretical poisson")
-qqplot(rpois(n = length(attendants_public_school_per_100k), lambda = mean(attendants_public_school_per_100k)), attendants_public_school_per_100k, xlab = "theoretical poisson")
-qqplot(rpois(n = length(attendants_public_worship_per_100k), lambda = mean(attendants_public_worship_per_100k)), attendants_public_worship_per_100k, xlab = "theoretical poisson")
+qqplot(rpois(n = length(attendants_public_school_per_10k), lambda = mean(attendants_public_school_per_10k)), attendants_public_school_per_10k, xlab = "theoretical poisson")
+qqplot(rpois(n = length(attendants_public_worship_per_2k), lambda = mean(attendants_public_worship_per_2k)), attendants_public_worship_per_2k, xlab = "theoretical poisson")
 ```
 Scales do not correspond exept maybe  criminals, so they are not Poisson distribued ?
 
@@ -118,8 +118,8 @@ Can they be Normal ?
 ```{r scale, include=FALSE}
 data$scaled_criminals_per_100k = (criminals_per_100k - mean(criminals_per_100k))/sd(criminals_per_100k)
 data$scaled_ale_beer_houses_per_100k = (ale_beer_houses_per_100k - mean(ale_beer_houses_per_100k))/sd(ale_beer_houses_per_100k)
-data$scaled_attendants_public_school_per_100k = (attendants_public_school_per_100k - mean(attendants_public_school_per_100k))/sd(attendants_public_school_per_100k)
-data$scaled_attendants_public_worship_per_100k = (attendants_public_worship_per_100k - mean(attendants_public_worship_per_100k))/sd(attendants_public_worship_per_100k)
+data$scaled_attendants_public_school_per_10k = (attendants_public_school_per_10k - mean(attendants_public_school_per_10k))/sd(attendants_public_school_per_10k)
+data$scaled_attendants_public_worship_per_100k = (attendants_public_worship_per_2k - mean(attendants_public_worship_per_2k))/sd(attendants_public_worship_per_2k)
 
 str(data)
 attach(data)
@@ -134,10 +134,10 @@ qqline(scaled_ale_beer_houses_per_100k)
 ```
 ```{r qqplots normal2, include=FALSE}
 par(mfrow=c(1,2))
-qqnorm(scaled_attendants_public_school_per_100k, main="Normal QQ plot - school attendants")
-qqline(scaled_attendants_public_school_per_100k)
+qqnorm(scaled_attendants_public_school_per_10k, main="Normal QQ plot - school attendants")
+qqline(scaled_attendants_public_school_per_10k)
 qqnorm(scaled_attendants_public_worship_per_100k, main = "Normal QQ plot -  worship attendants")
-qqline(scaled_attendants_public_school_per_100k)
+qqline(scaled_attendants_public_school_per_10k)
 ```
 ### Categorical features
 
@@ -196,8 +196,8 @@ boxplot(criminals_per_100k ~ factor(region_code, levels = ordered_region),
 # Selecting the predictor variables
 predictor_vars <- data.frame(
   ale_beer_houses_per_100k,
-  attendants_public_school_per_100k,
-  attendants_public_worship_per_100k
+  attendants_public_school_per_10k,
+  attendants_public_worship_per_2k
 )
 
 # Creating the scatterplot matrix
