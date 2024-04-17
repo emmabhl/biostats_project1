@@ -88,8 +88,8 @@ layout(matrix(c(1, 1, 2), nrow = 1), widths = c(1.25, 1))
 
 # Creating a single boxplot with different colors for each feature
 boxplot(ale_beer_houses_per_100k, 
-        attendants_public_school_per_100k, 
-        attendants_public_worship_per_100k, 
+        attendants_public_school_per_10k, 
+        attendants_public_worship_per_2k, 
         main = "Comparison of Various Features per County",
         names = c("Beer Houses", "School Attendants", "Worship Attendants"),
         ylab = "Count per 100k")
@@ -120,8 +120,8 @@ subset_data$region_code <- factor(subset_data$region_code, levels = c(factor("4"
 
 par(mfrow=c(1,3))
 boxplot(subset_data$ale_beer_houses_per_100k ~ subset_data$region_code, main = "", col = factor_colors, xlab="Region code")
-boxplot(subset_data$attendants_public_school_per_100k ~ subset_data$region_code, main = "", col = factor_colors, xlab = "Region code")
-boxplot(subset_data$attendants_public_worship_per_100k ~ subset_data$region_code, main = "", col = factor_colors, xlab ="Region code")
+boxplot(subset_data$attendants_public_school_per_10k ~ subset_data$region_code, main = "", col = factor_colors, xlab = "Region code")
+boxplot(subset_data$attendants_public_worship_per_2k ~ subset_data$region_code, main = "", col = factor_colors, xlab ="Region code")
 ```
 
 
@@ -142,7 +142,7 @@ pairs(data[,5:7], lower.panel = NULL,
 ```
 ```{r test, include=FALSE}
 
-plot(criminals_per_100k~attendants_public_worship_per_100k)
+plot(criminals_per_100k~attendants_public_worship_per_2k)
 plot(criminals_per_100k~ale_beer_houses_per_100k)
 print(factor_colors[data$region_code])
 print(data)
