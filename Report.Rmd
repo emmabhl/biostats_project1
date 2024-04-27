@@ -147,3 +147,62 @@ plot(criminals_per_100k~ale_beer_houses_per_100k)
 print(factor_colors[data$region_code])
 print(data)
 ```
+
+# Model Fitting
+In this project, we aim at finding a linear regression model predicting the number of criminals per 100 000 people. As stated in the project description, we will only consider numerical variable in our model, that is to say, only Ale/Beer Houses per 100 000 people, Attendants at public school per 10 000 people, and Attendants at public worship per 2000 people will be taken into account in our model. 
+In the following, we will first look at the model prediction based on these 3 variables and then we will try to find the best model possible by following a backward model selection process. This process will be based on adjusted R squared method ($R_{adj}^{2}$ in the following) and the Akaike’s Information Criterion (AIC in the following). We will try to lowering the AIC while increasing R squared adjusted in our models. 
+
+
+|Variable Name     | Description                             |
+|----------------- | ----------------------------------------|
+|Y                 |    Number of criminals per 100k         |
+|$\beta_{0}$       |    Ale/Beer Houses per 100k             |
+|$\beta_{1}$       |    Attendants at public school per 10k  |   
+|$\beta_{2}$       |    Attendants at public worship per 2k  |
+*Table XXXXXXXXXXXXXXXXXXXXXXX : Summary of variable names *
+
+**Model 1: ** \
+$Y = 172.88 + 0.12\beta_{0} + 0.10\beta_{1} + 0.039\beta_{2}$ \ 
+This model gives a $R_{adj}^{2}$ of 0.2619 and an AIC of 405.0494 . 
+Now that we have out reference model, let's try to optimize it. In the EDA paragraph, we saw that attendants at public school per 10k and attendants at public worship per 2k have a positive correlation of 0.6, therefore, we decided to remove the latest in the next model. 
+
+
+**Model 2: ** \
+$Y = 178.81 + 0.13\beta_{0} -0.077\beta_{1}$  \
+This model gives a $R_{adj}^{2}$ of 0.26 and an AIC of 404.041 . We can see that the model has a highest $R_{adj}^{2}$ and lower AIC, which means that the model is better than model 1.
+In the next model, we then wanted to see whether attendants at public worship per 2k contributes more to the performance of the model compared to attendants at public school per 10k.
+
+
+**Model 3: ** \
+$Y = 121.26 + \beta_{0} + 0.12\beta_{0} - 0.017\beta{2}$ \ 
+This model gives a $R_{adj}^{2}$ of 0.177 and an AIC of 408.52  which corresponds to poorest results compared to model 2.
+To make sure that attendants at public school per 10k really contributes to the improvement of the model, we decided to remove it in the next model. Attendants at public worship per 2k contributes is only removed in the next model model since we already demonstrated that it wasn't contributing to the increase in performance. 
+ 
+ 
+**Model 4: ** \
+$Y = 109.34 + 0.12\beta_{0}$ \
+This model gives a $R_{adj}^{2}$ of 0.19 and an AIC of 406.75 . Since both the $R_{adj}^{2}$ and the AIC are respectively lower and higher than for model 2, it means that attendants at public school per 10k does contribute to the increase of performance of our model. 
+Finally, we wanted to make sure that attendants at public school per 10k is not the only contributor to the performance of our model. To do that, we will only consider this variable in the last model.
+
+
+**Model 5:**\
+$Y = 209.42 - 0.059\beta_{1}$ \
+This model gives a $R_{adj}^{2}$ of 0.15 and an AIC of 414.22 . Since both the $R_{adj}^{2}$ and the AIC are respectively lower and higher than for model 2, it means that ale_beer_houses_per_100k also contributes to the performance of our model. 
+
+|   Model   | $R_{adj}^{2}$ | AIC       |
+| --------- | ------------- | --------- |
+| Model 1   |  0.2619       | 405.0494  |
+| Model 2   |  0.2638       | 404.0409  |
+| Model 3   |  0.1767       | 408.5154  |
+| Model 4   |  0.1936       | 406.7524  |
+| Model 5   |  0.1533       | 414.2217  |
+
+*Table XXXXXXXXXXXXXXXXXXXXXXX : Summary of the $R_{adj}^{2}$ and AIC for each model considered *
+
+# Model selection
+In the last section, we computed different models to determine which one is better. We saw that model 1 and model 2 gave us very close results when looking at R squared adjusted, however, looking at AIC values, we can see that model 2 has a lower one and we therefore decided to consider model 2 as our best model.
+The final model selected is $Y = 178.81 + 0.13\beta_{0} -0.077\beta_{1}$ (model2)
+
+# Discussion
+
+# Conclusion
