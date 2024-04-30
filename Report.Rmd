@@ -2,6 +2,7 @@
 title: "Report2"
 author: "Sander Miesen, Gaelle Verdon, Emma Boehly, Constance de Trogoff"
 date: "`r Sys.Date()`"
+geometry: margin=2.5cm
 output: pdf_document
 ---
 ```{r import, include=FALSE}
