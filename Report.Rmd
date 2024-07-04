@@ -1,6 +1,6 @@
 ---
 documentclass: article
-title: \Large \textbf{Regression Analysis of Crime Rates':' Examining the Impact of Alcohol Establishments, School Attendance, and Worship Participation} 
+title: \Large \textbf{Regression Analysis of Crime Rates Based on Alcohol Establishments, School Attendance, and Worship Participation Factors} 
 author: "Emma Boehly, Constance de Trogoff, Sander Miesen, Gaëlle Verdon"
 date: "`r Sys.Date()`"
 output : 
@@ -13,7 +13,7 @@ header-includes:
   \usepackage{fancyhdr}
   \pagestyle{fancy}
   \fancyhf{}
-  \fancyhead[L]{Regression Analysis of Crime Rates}
+  \fancyhead[L]{Regression Analysis}
   \fancyhead[R]{Emma Boehly, Constance de Trogoff, Sander Miesen, Gaëlle Verdon}
   \cfoot{\thepage}
   \fancypagestyle{plain}{\pagestyle{fancy}}
