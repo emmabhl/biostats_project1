@@ -17,6 +17,8 @@ header-includes:
   \fancyhead[R]{Emma Boehly, Constance de Trogoff, Sander Miesen, Gaëlle Verdon}
   \cfoot{\thepage}
   \fancypagestyle{plain}{\pagestyle{fancy}}
+  \usepackage{titling}
+  \setlength{\droptitle}{-3cm}
 ---
 
 \thispagestyle{empty}
@@ -46,10 +48,11 @@ data$region_name <- as.factor(data$region_name)
 attach(data)
 ```
 
-To start our data exploration, we first performed a univariate data analysis of the predictors and of the response variable of interest, the number of criminals per 100k per county. We have 3 numerical features : the number of ale and beer houses per 100k per county, the number of public school attendants per 10k per county, and the number of public worship attendants per 2k per county, and 3 categorical features : the county names, the region names and the region codes. By looking closely ar the data, we noticed that each sample corresponded to a different county name and thus we ignored this last feature for the rest of our analysis. We also remarked that each region name corresponded to a region code, except for South Midland which had the same region code as South Eastern, thus we replaced the region_code "1" of South Eastern to factor "0". Occurrences of categorical features are indicated in Table 1.
+To start our data exploration, we first performed a univariate data analysis of the predictors and of the response variable of interest, the number of criminals per 100k per county. We have 3 numerical features : the number of ale and beer houses per 100k per county, the number of public school attendants per 10k per county, and the number of public worship attendants per 2k per county, and 3 categorical features : the county names, the region names and the region codes. By looking closely ar the data, we noticed that each sample corresponded to a different county name and thus we ignored this last feature for the rest of our analysis. We also remarked that each region name corresponded to a region code, except for South Midland which had the same region code as South Eastern, thus we replaced the factor "1" of South Eastern to factor "0". Occurrences of categorical features are indicated in Table 1.
 
-Regarding the three numerical predictors, we first computed metrics which informed us on the center of their distribution (the mean and the median), and its spread (with the minimum and maximum value, the lower percentile 25 and the upper percentile 75 as well as the standard deviations), all of which are displayed in Table 2. While the mean is very sensitive to outliers, the median is not, and thus by comparing the two we get insights into the presence of outliers. We can observe that the mean and the median are quite similar relative to the spread for all three numerical features, hinting at the absence of outliers. In order to have a visual summary of the distributions, we made boxplots of the predictors, shown in Figure 1. They appear to be quite symmetric, although they are slightly left-skewed for the ale and beer houses and the worship attendants, and slightly right-skewed for the public school attendants. 
+Regarding the three numerical predictors, we first computed metrics which informed us on the center of their distribution (the mean and the median), and its spread (with the minimum and maximum value, the lower percentile 25 and the upper percentile 75 as well as the standard deviations), all of which are displayed in Table 2. In order to have a visual summary of the distributions, we made boxplots of the predictors, shown in Figure 1. They appear to be quite symmetric, although they are slightly left-skewed for the ale and beer houses and the worship attendants, and slightly right-skewed for the public school attendants. 
 
+[comment]: <> (While the mean is very sensitive to outliers, the median is not, and thus by comparing the two we get insights into the presence of outliers. We can observe that the mean and the median are quite similar relative to the spread for all three numerical features, hinting at the absence of outliers.) 
 ```{r heatmap, include=FALSE}
 
 cont_table = table(data$region_name, data$region_code)
@@ -109,6 +112,12 @@ sd(numerical_data$attendants_public_school_per_10k)
 sd(numerical_data$attendants_public_worship_per_2k)
 ```
 
+```{r library, include=FALSE}
+library(packHV)
+```
+
+Next, to get a better look at the response variable of interest, i.e. the number of criminals per county, we visualized its distribution with a histogram and a boxplot. As we can see in Figure 2, it is slightly left skewed. For a first naive comparison of its distribution across regions, we displayed separate boxplots for each region in Figure 3. We can observe clear differences between the number of criminals' medians, and thus we ordered them in ascending order. To get an initial intuition about how the predictor variables will influence the number of criminals, we looked at the counties with respectively the lowest (region 8, Northern, with a value of under 100) and highest (region 4, West Midland, with a value of over 200) median number of criminals. In Figure 3 Appendix, we can see that the distributions showed a net higher number of ale and beer Houses and a higher number of worship attendants in region 4 compared to region 8, so we can naively hypothesize that these two predictors might be positively correlated with the number of criminals. The number of attendants at public schools seem to be the same for both however, so there is nothing we can say about that yet.
+
 |         | Ale/Beer houses | School Attendants | Worship Attendants |
 |---------|-----------------|-------------------|--------------------|
 | Min     | 87.0            | 560.0             | 434.0              |
@@ -120,10 +129,6 @@ sd(numerical_data$attendants_public_worship_per_2k)
 | SD      | 165.0           | 161.4             | 172.5              |
 
 *Table 2 : Numerical univariate analysis of the three predictors : Number of Ale/Beer houses per 100k, Public school attendants per 10k and Public worship attendants per 2k*
-
-```{r library, include=FALSE}
-library(packHV)
-```
 
 ```{r boxplots2, echo=FALSE, fig.height = 4.5, fig.width = 8, fig.align = "center"}
 layout(matrix(c(1, 1, 2), nrow = 1), widths = c(1, 0.75))
@@ -139,15 +144,14 @@ hist_boxplot(criminals_per_100k, breaks=20, ymax=6, main="Variable of insterest 
 ```
 *Figure 1 : Univariate graphical analysis of numerical variables. On the left, boxplots of the three predictors : Number of Ale/Beer houses per 100k, public school attendants per 10k and public worship attendants per 2k. On the right, histogram and boxplot of the variable of interest : the number of criminals per 100k*
 
-*Figure 1 : Univariate graphical analysis of numerical variables. On the left, boxplots of the three predictors : Number of Ale/Beer houses per 100k, Public school attendants per 10k and Public worship attendants pers 2k. On the right, histogram and boxplot of the variable of interest : the number of criminals per 100k*
+To better visualize how the predictors are related with each other, we presented them in a pairwise correlation plot along with their pearson correlation coefficients which were computed independently of the region code, and this is shown in Figure 4. We can notice a positive correlation between the number of public school attendants and the number of public worship attendants which may indicate the necessity of removing one of the two in the following linear models in order to have a good balance between model accuracy and model simplicity.
 
-Next, to get a better look at the response variable of interest, i.e. the number of criminals per county, we visualized its distribution with a histogram and a boxplot. As we can see in Figure 2, it is slightly left skewed. For a first naive comparison of its distribution across regions, we displayed separate boxplots for each region in Figure 3. We can observe clear differences between the number of criminals' medians, and thus we ordered them in ascending order. To get an initial intuition about how the predictor variables will influence the number of criminals, we looked at the counties with respectively the lowest (region 8, Northern, with a value of under 100) and highest (region 4, West Midland, with a value of over 200) median number of criminals. In Figure 3, we can see that the distributions showed a net higher number of ale and beer Houses and a higher number of worship attendants in region 4 compared to region 8, so we can naively hypothesize that these two predictors might be positively correlated with the number of criminals. The number of attendants at public schools seem to be the same for both however, so there is nothing we can say about that yet.
-
-```{r bivariate boxplot, echo=FALSE, fig.height = 5, fig.width = 8, fig.align = "center"}
+```{r bivariate boxplot, echo=FALSE, fig.height = 4, fig.width = 7, fig.align = "center"}
 factor_colors <- c("red", "cyan", "magenta", "orange", "purple", "yellow", "pink", "green", "blue")
 
 # Order region codes by median value
 ordered_region <- names(sort(tapply(criminals_per_100k, region_code, median)))
+
 
 # Create boxplots ordered by median
 boxplot(criminals_per_100k ~ factor(region_code, levels = ordered_region), 
@@ -160,18 +164,6 @@ boxplot(criminals_per_100k ~ factor(region_code, levels = ordered_region),
 
 ```
 *Figure 2 : Number of criminals per 100k by region code. Colors of the region code remain the same for the whole analysis*
-
-```{r dist,echo=FALSE, fig.height = 3, fig.width = 6, fig.align = "center"}
-factor_colors <- c("blue", "red")
-subset_data <- data[data$region_code %in% c(factor("4"), factor("8")), ]
-subset_data$region_code <- factor(subset_data$region_code, levels = c(factor("4"), factor("8")))
-
-par(mfrow=c(1,3))
-boxplot(subset_data$ale_beer_houses_per_100k ~ subset_data$region_code, main = "", col = factor_colors, xlab="Region code", ylab="Ale/Beer Houses per 100k")
-boxplot(subset_data$attendants_public_school_per_10k ~ subset_data$region_code, main = "", col = factor_colors, xlab = "Region code", ylab="Public Schhol attendants per 10k")
-boxplot(subset_data$attendants_public_worship_per_2k ~ subset_data$region_code, main = "", col = factor_colors, xlab ="Region code", ylab="Public Worship attendants per 2k")
-```
-*Figure 3: Number of ale/beer Houses per 100k, public School attendants per 10k and public Worship attendants per 2k (the three predictors) for region Codes 4 and 8.*
 
 ```{r correlation3, echo=FALSE, warning=FALSE}
 factor_colors <- c("purple", "yellow", "orange", "blue", "magenta", "green", "cyan", "red", "pink")
@@ -190,8 +182,6 @@ pairs(data[,5:7], lower.panel = NULL,
 ```
 *Figure 4: Pairwise correlation plot between the three predictors : Ale/Beer Houses per 100k, public school attendants per 10k and public worship attendants per 2k. Pearson correlation coefficients are computed independently of the region code. Colors correspond to region codes as in Figure 2.*
 
-To better visualize how the predictors are related with each other, we presented them in a pairwise correlation plot along with their pearson correlation coefficients which were computed independently of the region code, and this is shown in Figure 4. We can notice a positive correlation between the number of public school attendants and the number of public worship attendants which may indicate the necessity of removing one of the two in the following linear models in order to have a good balance between model accuracy and model simplicity.
-
 ```{r test, include=FALSE}
 
 plot(criminals_per_100k~attendants_public_worship_per_2k)
@@ -201,45 +191,33 @@ print(data)
 ```
 
 # Model Fitting
-In this project, we aim at finding a linear regression model predicting the number of criminals per 100'000 people. As stated in the project description, we will only consider numerical variables in our model, so only the number of ale and beer Houses per 100'000 people, the number of attendants at public school per 10'000 people, and the number of attendants at public worship per 2'000 people.
-In the following, we will first look at the model prediction based on these 3 variables and then we will try to find the best model possible by following a backward model selection process. This process will be based on adjusted R squared method ($R_{adj}^{2}$ in the following) and the Akaike’s Information Criterion (AIC in the following). We will try to lowering the AIC while increasing the adjusted R-squared of our models. 
 
+In this project, we aim at finding a linear regression model predicting the number of criminals per 100 000 people. In the following, we will first look at the model prediction based on the 3 numerical variables and then we will try to find the best model possible by following a backward model selection process which consists in starting with all variables in the model and successively remove the worst one(s). This process will be based on adjusted R squared method ($R_{adj}^{2}$ in the following) and the Akaike’s Information Criterion (AIC in the following). We will try to lowering the AIC while increasing the $R_{adj}^{2}$ of our models. As opposed to R² which is computed as $R^2 = \frac{\text{SSRegression}}{\text{SSTotal}} = 1 - \frac{\text{SSError}}{\text{SSTotal}}$, the adjusted R² penalizes complex models: the more predictors included, the greater is the penalty. We have $R_{adj}^{2} =  1 - \frac{\text{MSError}}{\text{SSTotal} / (n - 1)} = 1 - \frac{n - 1}{n - 1 - k} (1 - R^2)$ where k is the number of predictors and n the sample size. In the same idea, the AIC is computed as $\text{AIC} = -2 \log L + 2p$ with L the maximum likelihood of the model and p the number of parameters of the model. As a result, the AIC combines a measure of deviance and a measure of complexity in order to obtain a good balance between the two.
 
-In this project, we aim at finding a linear regression model predicting the number of criminals per 100 000 people. As stated in the project description, we will only consider numerical variable in our model, that is to say, only Ale/Beer Houses per 100 000 people, Attendants at public school per 10 000 people, and Attendants at public worship per 2000 people will be taken into account in our model. In the following, we will first look at the model prediction based on these 3 variables and then we will try to find the best model possible by following a backward model selection process. This process will be based on adjusted R squared method ($R_{adj}^{2}$ in the following) and the Akaike’s Information Criterion (AIC in the following). We will try to lowering the AIC while increasing R squared adjusted in our models.
+[comment]: <> ( As stated in the project description, we will only consider numerical variable in our model, that is to say, only Ale/Beer Houses per 100 000 people, Attendants at public school per 10 000 people, and Attendants at public worship per 2000 people will be taken into account in our model.)
 
 **Model 1: ** \
-$Y = 172.88 + 0.12\beta_{0} + 0.10\beta_{1} + 0.039\beta_{2}$ \ 
+$\hat{Y} = 172.88 + 0.12\beta_{0} + 0.10\beta_{1} + 0.039\beta_{2}$ \ 
 This model gives a $R_{adj}^{2}$ of 0.2619 and an AIC of 405.0494. 
 Now that we have out reference model, let's try to optimize it. In the exploratory data analysis, we saw that the number of attendants at public school per 10k and the number of attendants at public worship per 2k have a positive correlation of 0.6. Therefore, we decided to remove the latter in the next model. 
 
 *Table 3 : Summary of variable names*
 
-**Model 2: ** \
-$Y = 178.81 + 0.13\beta_{0} -0.077\beta_{1}$  \
-This model gives a $R_{adj}^{2}$ of 0.26 and an AIC of 404.041. We can see that the model has a highest $R_{adj}^{2}$ and lower AIC, which means that the model is better than model 1.
-In the next model, we then wanted to see whether the number of attendants at public worship per 2k contributes more to the performance of the model compared to the number of attendants at public school per 10k.
-
 **Model 2:**\
-$Y = 178.81 + 0.13\beta_{0} -0.077\beta_{1}$\
+$\hat{Y} = 178.81 + 0.13\beta_{0} -0.077\beta_{1}$\
 This model gives a $R_{adj}^{2}$ of 0.26 and an AIC of 404.041 . We can see that the model has a highest $R_{adj}^{2}$ and lower AIC, which means that the model is better than model 1. In the next model, we then wanted to see whether attendants at public worship per 2k contributes more to the performance of the model compared to attendants at public school per 10k.
 
 **Model 3: ** \
-$Y = 121.26 + 0.12\beta_{0} - 0.017\beta_{2}$ \ 
+$\hat{Y} = 121.26 + 0.12\beta_{0} - 0.017\beta_{2}$ \ 
 This model gives a $R_{adj}^{2}$ of 0.177 and an AIC of 408.52  which correspond to poorer results compared to model 2.
 To make sure that the number of attendants at public school per 10k really contributes to the improvement of the model, we decided to remove it in the next model. The number of attendants at public worship per 2k is also removed in the next model model since we already demonstrated that it wasn't contributing to the increase in performance. 
- 
- 
-**Model 4: ** \
-$Y = 109.34 + 0.12\beta_{0}$ \
-This model gives a $R_{adj}^{2}$ of 0.19 and an AIC of 406.75 . Since both the $R_{adj}^{2}$ and the AIC are respectively lower and higher than for model 2, the number of attendants at public school per 10k does contribute to the increase of performance of our model. 
-Finally, we wanted to make sure that the number of attendants at public school per 10k is not the only contributor to the performance of our model. To do that, we will only consider this variable in the last model.
 
 **Model 4:**\
-$Y = 109.34 + 0.12\beta_{0}$\
+$\hat{Y} = 109.34 + 0.12\beta_{0}$\
 This model gives a $R_{adj}^{2}$ of 0.19 and an AIC of 406.75 . Since both the $R_{adj}^{2}$ and the AIC are respectively lower and higher than for model 2, it means that attendants at public school per 10k does contribute to the increase of performance of our model. Finally, we wanted to make sure that attendants at public school per 10k is not the only contributor to the performance of our model. To do that, we will only consider this variable in the last model.
 
 **Model 5:**\
-$Y = 209.42 - 0.059\beta_{1}$ \
+$\hat{Y} = 209.42 - 0.059\beta_{1}$ \
 This model gives a $R_{adj}^{2}$ of 0.15 and an AIC of 414.22 . Since both the $R_{adj}^{2}$ and the AIC are respectively lower and higher than for model 2, it means that the number of ale and beer houses per 100k also contributes to the performance of our model. 
 
 | Model   | $R_{adj}^{2}$ | AIC      |
@@ -253,13 +231,11 @@ This model gives a $R_{adj}^{2}$ of 0.15 and an AIC of 414.22 . Since both the $
 *Table 4 : Summary of the* $R_{adj}^{2}$ and AIC for each model considered
 
 # Model selection and Model Assessment
-In the last section, we computed different models to determine which one is better. We saw that model 1 and model 2 gave us very close results when looking at the adjusted R-squared. However, when looking at AIC values, we can see that model 2 has a lower one and we therefore decided to consider model 2 as our best model.
-The final model that we selected is $Y = 178.81 + 0.13\beta_{0} -0.077\beta_{1}$ (model2)
+In the last section, we computed different models to determine which one is better. The final model that we selected is $\hat{Y} = 178.81 + 0.13\beta_{0} -0.077\beta_{1}$ (model2)
 
 However before accepting our model, it is essential to verify that the model's assumptions hold. These include uncorrelated, homeoscedastic, normally distributed erros with mean 0. By looking at the diagnostic plots, especially the residuals vs fitted plot, we can observe that the mean of the residuals is slightly below 0 and not perfectly homeoscedastic with 3 points (23, 24, 34) having a high residual value. Furthermore, the QQ-normal plot of residuals showed approximately normally distributed errors with a slight long tail on the right and three serious under-predictions corresponding to the previously mentionned points. Colors of the different regions were displayed on the plots in order to see if those specific points belong to a particular region. It appeared that most of the points of the right long tail including points 23 and 24 belong to the region of West Midland (region code 4) which has a particular high number of criminals (see EDA). In the same way, point 34 belongs to the region of North Western (region code 6) which is the second region with the highest number of residuals. As a result, we could hypothesize that the peculiar number of criminals in those two regions might not fully explained by our model. 
-Other diagnostic plots on the presence of influential points were also visualized although not displayed here and no specific outliers were found although point 24 of West Midland appeared to be the most influential one.
 
-However before accepting our model, it is essential to verify that model assumptions hold. These include uncorrelated, homeoscedastic, normally distributed erros with mean 0. By looking at the diagnostic plots, especially the residuals vs fitted plot, we could observe that the mean of the residuals is slightly below 0 and not perfectly homeoscedastic with 3 points having a high residual value : Points 23, 24 and 34. Furthermore, the QQ-normal plot of residuals showed approximately normally distributed errors with a slight long tail on the right and three serious under-predictions corresponding to the previously mentionned points. Colors of the different regions were displayed on the plots in order to see if those specific points belong to a particular region. It appeared that most of the points of the right long tail including points 23 and 24 belong to the region of West Midland (region code 4) which has a particular high number of criminals (see EDA). In the same way, point 34 belongs to the region of North Western (region code 6) which is the second region with the highest number of residuals. As a result, we could hypothesize that the peculiar number of criminals in those two regions might not fully explained by our model. Other diagnostic plots on the presence of influential points were also visualized although not displayed here and no specific outliers were found although point 24 of West Midland appeared to be the most influential one.
+[comment]: <>  (Other diagnostic plots on the presence of influential points were also visualized although not displayed here and no specific outliers were found although point 24 of West Midland appeared to be the most influential one.)
 
 ```{r diagnostics, echo=FALSE, fig.height = 3.5, fig.width = 5.5, fig.align = "center"}
 # Define model
@@ -270,7 +246,7 @@ plot(model2, which = 1, col=factor_colors[region_code])
 plot(model2, which = 2, col=factor_colors[region_code])
 ```
 
-*Figure 5: Diagnostic plots of model 2* $Y = 178.81 + 0.13\beta_{0} -0.077\beta_{1}$. On the left is the Residuals vs Fitted plot. On the right, is the QQ-normal plot of residuals. Colors correspond to region codes as in Figure 2.
+*Figure 5: Diagnostic plots of model 2* $\hat{Y} = 178.81 + 0.13\beta_{0} -0.077\beta_{1}$. On the left is the Residuals vs Fitted plot. On the right, is the QQ-normal plot of residuals. Colors correspond to region codes as in Figure 2.
 
 ```{r outliers, include=FALSE}
 # Define model
@@ -289,4 +265,19 @@ Comparing the counties with highest and lowest crime rates, we saw that the numb
 
 Furthermore, we noticed that there was a strong positive correlation between the number of people attending public school and the number of people attending public worship, which helped guide our model selection. Indeed, in our final model, we only included the number of beer and ale houses and the number of people attending public school, as the number of people attending public worship did not seem to contribute much to the explanatory power of the model.
 
-In the end, we found that the best model, chosen by considering both the explained variance ($R_{adj}^{2}$) and an information criterion (AIC), was $Y = 178.81 + 0.13\beta_{0} -0.077\beta_{1}$, where Y is the number of criminals per 100k, $\beta_{0}$ is the number of ale and beer houses per 100k and $\beta_{1}$ is the number of people attending public school per 10k. This final model indicates that the number of criminals seems to increase as the number of ale and beer houses increases, and decreases as the number of people attending public school increases. This first part is in accordance to the first hypothesis, while the second contradicts the second hypothesis that we made during exploratory data analysis. The reason for this is of course that our hypotheses were based on data from two particular counties only, while the final model considers all of them, reminding us of the importance of basing our generalized results on data from the whole population. Finally, we saw that the model assumptions were not perfectly met for some of the counties' data (West Midland, North Western), and that the model was therefore maybe not the best to explain the number of criminals in those counties.
+In the end, we found that the best model, chosen by considering both the explained variance ($R_{adj}^{2}$) and an information criterion (AIC), was $\hat{Y} = 178.81 + 0.13\beta_{0} -0.077\beta_{1}$, where Y is the number of criminals per 100k, $\beta_{0}$ is the number of ale and beer houses per 100k and $\beta_{1}$ is the number of people attending public school per 10k. This final model indicates that the number of criminals seems to increase as the number of ale and beer houses increases, and decreases as the number of people attending public school increases. This first part is in accordance to the first hypothesis, while the second contradicts the second hypothesis that we made during exploratory data analysis. The reason for this is of course that our hypotheses were based on data from two particular counties only, while the final model considers all of them, reminding us of the importance of basing our generalized results on data from the whole population. Finally, we saw that the model assumptions were not perfectly met for some of the counties' data (West Midland, North Western), and that the model was therefore maybe not the best to explain the number of criminals in those counties.
+
+# Appendix
+
+```{r dist,echo=FALSE, fig.height = 3, fig.width = 6, fig.align = "center"}
+factor_colors <- c("blue", "red")
+subset_data <- data[data$region_code %in% c(factor("4"), factor("8")), ]
+subset_data$region_code <- factor(subset_data$region_code, levels = c(factor("4"), factor("8")))
+
+par(mfrow=c(1,3))
+boxplot(subset_data$ale_beer_houses_per_100k ~ subset_data$region_code, main = "", col = factor_colors, xlab="Region code", ylab="Ale/Beer Houses per 100k")
+boxplot(subset_data$attendants_public_school_per_10k ~ subset_data$region_code, main = "", col = factor_colors, xlab = "Region code", ylab="Public Schhol attendants per 10k")
+boxplot(subset_data$attendants_public_worship_per_2k ~ subset_data$region_code, main = "", col = factor_colors, xlab ="Region code", ylab="Public Worship attendants per 2k")
+```
+*Figure 3 Appendix: Number of ale/beer Houses per 100k, public School attendants per 10k and public Worship attendants per 2k (the three predictors) for region Codes 4 and 8.*
+
